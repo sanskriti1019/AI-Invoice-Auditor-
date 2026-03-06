@@ -21,12 +21,24 @@ export default function Home() {
   const [processedData, setProcessedData] = useState<any[]>([]); // Using any for simplicity, usually match AnalysisResult[]
   const isDesktop = useMedia("(min-width: 1024px)", true);
 
-  // Prevent scrolling while intro is active
+  // Prevent scrolling while intro is active and handle reveal animations
   useEffect(() => {
     if (showIntro) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "auto";
+      
+      // Initialize intersection observer for 'reveal' elements
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      }, { threshold: 0.1 });
+
+      document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+      return () => observer.disconnect();
     }
   }, [showIntro]);
 
