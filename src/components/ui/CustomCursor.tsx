@@ -1,86 +1,105 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion, useSpring } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { motion, useSpring, useMotionValue } from "framer-motion";
 
 export default function CustomCursor({ isDesktop }: { isDesktop: boolean }) {
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isVisible, setIsVisible] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
-  const [isHidden, setIsHidden] = useState(true);
+  const [isClicking, setIsClicking] = useState(false);
 
-  // Smooth out the movement for the outer ring
-  const springConfigRing = { damping: 25, stiffness: 150, mass: 0.6 };
-  const ringX = useSpring(position.x, springConfigRing);
-  const ringY = useSpring(position.y, springConfigRing);
+  // Raw mouse position (inner dot snaps instantly)
+  const mouseX = useMotionValue(-100);
+  const mouseY = useMotionValue(-100);
 
-  // Very tight movement for the dot
-  const springConfigDot = { damping: 50, stiffness: 400, mass: 0.1 };
-  const dotX = useSpring(position.x, springConfigDot);
-  const dotY = useSpring(position.y, springConfigDot);
+  // Outer ring follows with a smooth spring delay — matching the image's lag effect
+  const springCfg = { damping: 18, stiffness: 120, mass: 0.8 };
+  const ringX = useSpring(mouseX, springCfg);
+  const ringY = useSpring(mouseY, springCfg);
 
   useEffect(() => {
     if (!isDesktop) return;
 
-    const moveCursor = (e: MouseEvent) => {
-      setPosition({ x: e.clientX, y: e.clientY });
-      if (isHidden) setIsHidden(false);
+    const onMove = (e: MouseEvent) => {
+      mouseX.set(e.clientX);
+      mouseY.set(e.clientY);
+      if (!isVisible) setIsVisible(true);
     };
 
-    const handleMouseLeave = () => setIsHidden(true);
-    const handleMouseEnter = () => setIsHidden(false);
+    const onLeave = () => setIsVisible(false);
+    const onEnter = () => setIsVisible(true);
 
-    // Detect if hovering over interactable elements
-    const handleMouseOver = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (
-        target.tagName.toLowerCase() === "a" ||
-        target.tagName.toLowerCase() === "button" ||
-        target.closest("a") ||
-        target.closest("button") ||
-        target.closest(".interactive") ||
-        target.closest("input") ||
-        target.closest("select")
-      ) {
-        setIsHovering(true);
-      } else {
-        setIsHovering(false);
-      }
+    const onOver = (e: MouseEvent) => {
+      const t = e.target as HTMLElement;
+      const interactive =
+        t.tagName === "A" ||
+        t.tagName === "BUTTON" ||
+        t.tagName === "INPUT" ||
+        t.tagName === "SELECT" ||
+        t.tagName === "TEXTAREA" ||
+        t.closest("a") !== null ||
+        t.closest("button") !== null ||
+        t.closest(".interactive") !== null ||
+        t.closest("input") !== null ||
+        t.closest("select") !== null;
+      setIsHovering(interactive);
     };
 
-    window.addEventListener("mousemove", moveCursor);
-    window.addEventListener("mouseleave", handleMouseLeave);
-    window.addEventListener("mouseenter", handleMouseEnter);
-    window.addEventListener("mouseover", handleMouseOver);
+    const onDown = () => setIsClicking(true);
+    const onUp = () => setIsClicking(false);
+
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseleave", onLeave);
+    window.addEventListener("mouseenter", onEnter);
+    window.addEventListener("mouseover", onOver);
+    window.addEventListener("mousedown", onDown);
+    window.addEventListener("mouseup", onUp);
 
     return () => {
-      window.removeEventListener("mousemove", moveCursor);
-      window.removeEventListener("mouseleave", handleMouseLeave);
-      window.removeEventListener("mouseenter", handleMouseEnter);
-      window.removeEventListener("mouseover", handleMouseOver);
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseleave", onLeave);
+      window.removeEventListener("mouseenter", onEnter);
+      window.removeEventListener("mouseover", onOver);
+      window.removeEventListener("mousedown", onDown);
+      window.removeEventListener("mouseup", onUp);
     };
-  }, [isDesktop, isHidden]);
+  }, [isDesktop, isVisible, mouseX, mouseY]);
 
-  if (!isDesktop || isHidden) return null;
+  if (!isDesktop) return null;
 
   return (
     <>
+      {/* ── Inner Dot ── snaps to cursor precisely, like the bright teal dot in reference */}
       <motion.div
-        className="fixed top-0 left-0 w-3 h-3 bg-accent-cyan rounded-full pointer-events-none z-[100] shadow-[0_0_10px_rgba(6,182,212,0.8)]"
+        className="fixed top-0 left-0 pointer-events-none z-[9999]"
         style={{
-          x: dotX,
-          y: dotY,
+          x: mouseX,
+          y: mouseY,
           translateX: "-50%",
           translateY: "-50%",
         }}
         animate={{
-          scale: isHovering ? 0 : 1,
-          opacity: isHovering ? 0 : 1
+          opacity: isVisible ? 1 : 0,
+          scale: isClicking ? 0.5 : isHovering ? 1.8 : 1,
         }}
-        transition={{ duration: 0.2 }}
-      />
-      
+        transition={{ duration: 0.15 }}
+      >
+        {/* Glowing core dot */}
+        <div
+          style={{
+            width: "10px",
+            height: "10px",
+            borderRadius: "50%",
+            background: "#00E5D1",
+            boxShadow:
+              "0 0 6px 2px rgba(0,229,209,0.9), 0 0 16px 4px rgba(0,229,209,0.5)",
+          }}
+        />
+      </motion.div>
+
+      {/* ── Outer Ring ── follows with spring delay — the large circle in reference */}
       <motion.div
-        className="fixed top-0 left-0 w-12 h-12 border rounded-full pointer-events-none z-[99]"
+        className="fixed top-0 left-0 pointer-events-none z-[9998]"
         style={{
           x: ringX,
           y: ringY,
@@ -88,12 +107,26 @@ export default function CustomCursor({ isDesktop }: { isDesktop: boolean }) {
           translateY: "-50%",
         }}
         animate={{
-          scale: isHovering ? 1.5 : 1,
-          borderColor: isHovering ? "rgba(6,182,212,0.8)" : "rgba(6,182,212,0.4)",
-          backgroundColor: isHovering ? "rgba(6,182,212,0.15)" : "transparent"
+          opacity: isVisible ? 1 : 0,
+          scale: isClicking ? 0.85 : isHovering ? 1.6 : 1,
         }}
-        transition={{ type: "tween", ease: "circOut", duration: 0.15 }}
+        transition={{ duration: 0.2, ease: "easeOut" }}
       >
+        <div
+          style={{
+            width: "44px",
+            height: "44px",
+            borderRadius: "50%",
+            border: isHovering
+              ? "1.5px solid rgba(0,229,209,0.85)"
+              : "1.5px solid rgba(0,229,209,0.45)",
+            background: isHovering ? "rgba(0,229,209,0.06)" : "transparent",
+            boxShadow: isHovering
+              ? "0 0 14px 2px rgba(0,229,209,0.2), inset 0 0 8px rgba(0,229,209,0.1)"
+              : "0 0 8px 1px rgba(0,229,209,0.1)",
+            transition: "border-color 0.2s, box-shadow 0.2s, background 0.2s",
+          }}
+        />
       </motion.div>
     </>
   );

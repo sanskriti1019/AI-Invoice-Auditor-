@@ -64,7 +64,7 @@ export default function WhatItChecks() {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section className="py-24 md:py-32 px-6 bg-dark">
+    <section className="py-24 md:py-32 px-6 bg-dark reveal">
       <div className="max-w-6xl mx-auto">
         <motion.div
           ref={ref}
@@ -96,7 +96,7 @@ export default function WhatItChecks() {
         >
           {checks.map((check, i) => (
             <motion.div key={i} variants={fadeInUp}>
-              <div className="glass-card h-full p-6 group hover:-translate-y-1 transition-transform">
+              <div className="glass-card h-full p-6 group hover:-translate-y-1 transition-transform reveal card-hover shimmer">
                 <div className={`w-12 h-12 rounded-lg bg-dark-900 border border-white/5 flex items-center justify-center mb-4 ${check.color} shadow-[0_0_15px_currentColor] opacity-80 group-hover:opacity-100 transition-opacity`}>
                    <check.icon className="w-6 h-6" strokeWidth={2} />
                 </div>

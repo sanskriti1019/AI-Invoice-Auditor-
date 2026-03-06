@@ -55,7 +55,7 @@ const stats = [
 
 export default function Dashboard() {
   return (
-    <section id="dashboard" className="py-24 md:py-32 px-6 bg-dark-900 border-y border-white/5 relative overflow-hidden">
+    <section id="dashboard" className="py-24 md:py-32 px-6 bg-dark-900 border-y border-white/5 relative overflow-hidden reveal">
       {/* Background elements */}
       <div className="absolute top-0 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[120px] pointer-events-none"></div>
       <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-accent-purple/10 rounded-full blur-[120px] pointer-events-none"></div>
@@ -70,7 +70,7 @@ export default function Dashboard() {
         >
           <motion.h2
             variants={fadeInUp}
-            className="text-4xl md:text-5xl font-bold text-gray-100 mb-4"
+            className="text-4xl md:text-5xl font-bold text-gray-100 mb-4 text-glow"
           >
             Intelligence Output
           </motion.h2>
@@ -93,7 +93,7 @@ export default function Dashboard() {
             <motion.div
               key={i}
               variants={fadeInUp}
-              className={`glass-card p-6 border ${stat.highlight ? 'border-primary/50 shadow-[0_0_15px_rgba(59,130,246,0.15)] bg-gradient-to-b from-primary/10 to-transparent' : 'border-white/5'}`}
+              className={`glass-card p-6 border shimmer interactive ${stat.highlight ? 'border-primary/50 shadow-[0_0_15px_rgba(59,130,246,0.15)] bg-gradient-to-b from-primary/10 to-transparent' : 'border-white/5'}`}
             >
               <p className="text-sm font-medium text-gray-400 mb-2 uppercase tracking-wider">{stat.label}</p>
               <p className={`text-3xl font-bold ${stat.highlight ? 'text-primary text-glow' : 'text-gray-100'}`}>
@@ -110,7 +110,7 @@ export default function Dashboard() {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="glass-card p-6 border border-white/5 lg:col-span-1"
+            className="glass-panel p-6 border border-white/5 lg:col-span-1 reveal"
           >
             <h3 className="text-lg font-semibold text-gray-200 mb-6 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-accent-purple animate-pulse"></span>
@@ -150,7 +150,7 @@ export default function Dashboard() {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.3 }}
-            className="glass-card p-6 border border-white/5 lg:col-span-2 interactive"
+            className="glass-panel p-6 border border-white/5 lg:col-span-2 interactive reveal hover:border-primary/50 transition-colors"
           >
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-semibold text-gray-200 flex items-center gap-2">
@@ -191,7 +191,7 @@ export default function Dashboard() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.4 }}
-            className="glass-card p-6 border border-white/5 md:col-span-2 lg:col-span-3 interactive"
+            className="glass-panel p-6 border border-white/5 md:col-span-2 lg:col-span-3 interactive reveal hover:border-accent-purple/50 transition-colors"
           >
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-semibold text-gray-200 flex items-center gap-2">

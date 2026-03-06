@@ -38,7 +38,7 @@ export default function HowItWorks() {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section className="py-24 md:py-32 px-6 bg-dark relative overflow-hidden">
+    <section className="py-24 md:py-32 px-6 bg-dark relative overflow-hidden reveal">
       {/* Background glow */}
       <div className="absolute top-1/2 left-0 w-96 h-96 bg-primary/5 rounded-full blur-[100px] -translate-y-1/2"></div>
       
@@ -75,7 +75,7 @@ export default function HowItWorks() {
             <motion.div
               key={i}
               variants={fadeInUp}
-              className="flex flex-col md:flex-row gap-6 items-start p-6 rounded-2xl glass-card relative group"
+              className="flex flex-col md:flex-row gap-6 items-start p-6 rounded-2xl glass-card relative group card-hover shimmer"
             >
               <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-dark-800 border border-white/10 text-primary flex items-center justify-center group-hover:bg-primary/10 group-hover:border-primary/30 transition-all duration-300 shadow-[0_0_15px_rgba(59,130,246,0.1)] group-hover:shadow-[0_0_20px_rgba(59,130,246,0.2)]">
                 <step.icon className="w-8 h-8" strokeWidth={1.5} />

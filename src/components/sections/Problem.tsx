@@ -39,7 +39,7 @@ export default function Problem() {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section ref={ref} className="py-24 md:py-32 px-6 bg-dark-900 border-y border-white/5 relative">
+    <section ref={ref} className="py-24 md:py-32 px-6 bg-dark-900 border-y border-white/5 relative reveal">
       <div className="absolute right-0 bottom-0 w-[500px] h-[500px] bg-accent-purple/5 opacity-50 blur-[120px] rounded-full pointer-events-none"></div>
 
       <div className="max-w-6xl mx-auto relative z-10">
@@ -71,7 +71,7 @@ export default function Problem() {
         >
           {problems.map((problem, i) => (
             <motion.div key={i} variants={fadeInUp}>
-               <div className="glass-card h-full p-8 relative overflow-hidden group">
+               <div className="glass-card h-full p-8 relative overflow-hidden group hover:border-primary/50 shimmer card-hover">
                 <div className="absolute top-0 right-0 p-4 opacity-10 transform translate-x-4 -translate-y-4 group-hover:scale-110 group-hover:opacity-20 transition-all duration-500">
                   <problem.icon className="w-32 h-32 text-white" strokeWidth={1} />
                 </div>

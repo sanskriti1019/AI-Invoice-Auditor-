@@ -10,7 +10,10 @@ export default function Hero() {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-dark">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-dark scanlines">
+      {/* Dynamic Background Noise */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none z-50 bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
+      
       {/* Futuristic Background Layers */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-dark-800 via-dark to-dark opacity-90 z-0"></div>
       
@@ -47,12 +50,12 @@ export default function Hero() {
         ))}
       </div>
 
-      <div className="relative z-10 max-w-5xl mx-auto px-6 text-center">
+      <div className="relative z-10 max-w-5xl mx-auto px-6 text-center reveal visible">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
-          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm mb-8 text-sm text-gray-300"
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm mb-8 text-sm text-gray-300 shimmer"
         >
           <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse"></span>
           Next-Generation Invoice Processing
@@ -85,11 +88,11 @@ export default function Hero() {
           transition={{ duration: 0.8, delay: 0.4 }}
           className="flex flex-col sm:flex-row gap-6 justify-center"
         >
-          <Button onClick={scrollToDemo} variant="glow" size="lg">
+          <Button onClick={scrollToDemo} variant="glow" size="lg" className="glow-cyan interactive">
             Start Processing Batch
             <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </Button>
-          <Button onClick={scrollToDemo} variant="outline" size="lg">
+          <Button onClick={scrollToDemo} variant="outline" size="lg" className="interactive gradient-border">
             <Play className="w-5 h-5" />
             Watch Pipeline Demo
           </Button>
