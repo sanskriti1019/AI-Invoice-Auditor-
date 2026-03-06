@@ -330,21 +330,27 @@ export default function Demo({ onProcessed, onRemove }: { onProcessed?: (results
                                     {analysis.discrepancies.length}
                                   </p>
                                 </div>
-                                <div className="flex items-center gap-3">
-                                  <div className="p-2 bg-dark-900 rounded-lg border border-white/5">
-                                    {isExpanded ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
-                                  </div>
-                                  
-                                  <button 
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleRemoveFile(file.id, analysis.extracted.id);
-                                    }}
-                                    className="p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all border border-red-500/20"
-                                    title="Remove Report"
-                                  >
-                                    <X className="w-4 h-4" />
-                                  </button>
+                                <div className="grid grid-cols-2 gap-2 ml-4 pl-4 border-l border-white/10 flex-shrink-0">
+                                   <div 
+                                     className="w-9 h-9 bg-dark-900 rounded-lg border border-white/5 flex items-center justify-center hover:bg-white/10 transition-colors cursor-pointer"
+                                     onClick={(e) => {
+                                       e.stopPropagation();
+                                       toggleExpand(analysis.extracted.id);
+                                     }}
+                                   >
+                                     {isExpanded ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
+                                   </div>
+                                   
+                                   <button 
+                                     onClick={(e) => {
+                                       e.stopPropagation();
+                                       handleRemoveFile(file.id, analysis.extracted.id);
+                                     }}
+                                     className="w-9 h-9 flex items-center justify-center rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all border border-red-500/20 opacity-0 group-hover/result:opacity-100 transform scale-90 group-hover:scale-100"
+                                     title="Remove Report"
+                                   >
+                                     <X className="w-4 h-4" />
+                                   </button>
                                 </div>
                              </div>
                           </div>
