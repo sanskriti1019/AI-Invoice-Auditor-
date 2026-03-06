@@ -34,6 +34,10 @@ export default function Home() {
     setProcessedData(prev => [...prev, ...results]);
   };
 
+  const handleRemove = (id: string) => {
+    setProcessedData(prev => prev.filter(item => item.extracted.id !== id));
+  };
+
   return (
     <>
       <CustomCursor isDesktop={isDesktop} />
@@ -55,7 +59,7 @@ export default function Home() {
           <Problem />
           <HowItWorks />
           <WhatItChecks />
-          <Demo onProcessed={handleProcessed} />
+          <Demo onProcessed={handleProcessed} onRemove={handleRemove} />
           <Dashboard data={processedData} />
           <DesignPhilosophy />
           <WriteUp />

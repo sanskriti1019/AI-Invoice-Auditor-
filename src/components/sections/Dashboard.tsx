@@ -71,8 +71,28 @@ export default function Dashboard({ data = [] }: DashboardProps) {
   ] : stats;
 
   const currentVendorData = hasRealData ? 
-    data.slice(0, 5).map(d => ({ name: d.extracted.vendorName.split(' ')[0], overcharge: d.summary.potentialOvercharge })) : 
-    vendorData;
+    // Aggregate by vendor
+    (() => {
+        const aggregated: Record<string, number> = {};
+        data.forEach(d => {
+            const v = d.extracted.vendorName;
+            aggregated[v] = (aggregated[v] || 0) + d.summary.potentialOvercharge;
+        });
+        return Object.entries(aggregated)
+            .map(([name, overcharge]) => ({ name: name.split(' ')[0], overcharge }))
+            .sort((a, b) => b.overcharge - a.overcharge)
+            .slice(0, 5);
+    })() : vendorData;
+
+  const currentTrendData = hasRealData ? 
+    // Group by date or just sequence them for visualization
+    data.sort((a,b) => new Date(a.extracted.invoiceDate).getTime() - new Date(b.extracted.invoiceDate).getTime())
+        .map((d, i) => ({
+            month: d.extracted.invoiceDate.split('-').slice(1).join('/'),
+            billed: d.summary.totalBilled,
+            validated: d.summary.estimatedCorrect,
+            anomalyRate: d.discrepancies.length > 0 ? (d.summary.potentialOvercharge / d.summary.totalBilled * 100).toFixed(1) : 0
+        })) : historicalData;
 
   // Calculate anomaly distribution from real data if available
   const currentErrorData = hasRealData ? (() => {
@@ -81,9 +101,9 @@ export default function Dashboard({ data = [] }: DashboardProps) {
         counts[disc.type] = (counts[disc.type] || 0) + 1;
     }));
     const total = Object.values(counts).reduce((a, b) => a + b, 0);
-    if (total === 0) return errorTypeData;
+    if (total === 0) return [{ name: "Healthy", value: 100, color: "#4ADE80" }];
     return Object.entries(counts).map(([name, count], i) => ({
-        name,
+        name: name.length > 15 ? name.substring(0, 15) + '...' : name,
         value: Math.round((count / total) * 100),
         color: errorTypeData[i % errorTypeData.length].color
     }));
@@ -194,7 +214,7 @@ export default function Dashboard({ data = [] }: DashboardProps) {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.3 }}
-            className="glass-panel p-6 border border-white/5 lg:col-span-2 interactive reveal hover:border-primary/50 transition-colors"
+            className="glass-panel p-6 border border-white/5 lg:col-span-2 hover:border-primary/30 transition-colors"
           >
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-semibold text-gray-200 flex items-center gap-2">
@@ -202,26 +222,23 @@ export default function Dashboard({ data = [] }: DashboardProps) {
                 Processing Volume Trends
               </h3>
               <div className="flex gap-2">
-                <button className="text-xs px-3 py-1 rounded bg-dark-800 border border-white/10 text-gray-400 hover:text-primary hover:border-primary transition-colors interactive">7D</button>
-                <button className="text-xs px-3 py-1 rounded bg-primary/20 border border-primary text-primary transition-colors interactive">30D</button>
-                <button className="text-xs px-3 py-1 rounded bg-dark-800 border border-white/10 text-gray-400 hover:text-primary hover:border-primary transition-colors interactive">YTD</button>
+                 <button className="text-[10px] px-2 py-0.5 rounded bg-dark-800 border border-white/10 text-gray-400">Live Feed</button>
               </div>
             </div>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={historicalData} margin={{ left: 0, right: 20, top: 10, bottom: 0 }}>
+                <AreaChart data={currentTrendData} margin={{ left: -20, right: 10, top: 10, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorBilled" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
                       <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" vertical={false} />
-                  <XAxis dataKey="month" stroke="#64748B" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#64748B" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `${v / 1000}k`} />
+                  <XAxis dataKey="month" stroke="#64748B" fontSize={11} tickLine={false} axisLine={false} />
+                  <YAxis stroke="#64748B" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `₹${v/1000}k`} />
                   <Tooltip 
                     cursor={{ stroke: '#3B82F6', strokeWidth: 1, strokeDasharray: '4 4' }}
-                    contentStyle={{ backgroundColor: '#12142B', borderColor: '#3B82F6', borderRadius: '8px', color: '#fff' }}
+                    contentStyle={{ backgroundColor: '#12142B', borderColor: '#3B82F6', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }}
                   />
                   <Area type="monotone" dataKey="billed" stroke="#3B82F6" fillOpacity={1} fill="url(#colorBilled)" strokeWidth={2} />
                 </AreaChart>
@@ -235,27 +252,22 @@ export default function Dashboard({ data = [] }: DashboardProps) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.4 }}
-            className="glass-panel p-6 border border-white/5 md:col-span-2 lg:col-span-3 interactive reveal hover:border-accent-purple/50 transition-colors"
+            className="glass-panel p-6 border border-white/5 md:col-span-2 lg:col-span-3 hover:border-accent-purple/30 transition-colors"
           >
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-semibold text-gray-200 flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-neon-amber animate-pulse"></span>
                 Anomaly Detection Confidence & Volume
               </h3>
-              <select className="bg-dark-800 border border-white/10 text-sm text-gray-300 rounded px-3 py-1 outline-none focus:border-primary transition-colors interactive">
-                <option>All Vendors</option>
-                <option>Tech Supplies</option>
-                <option>Logistics Inc</option>
-              </select>
             </div>
             <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
-                {/* @ts-ignore Recharts ComposedChart typings can be finicky */}
-                <ComposedChart data={historicalData} margin={{ left: 10, right: 20, top: 20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" vertical={false} />
-                  <XAxis dataKey="month" stroke="#64748B" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis yAxisId="left" stroke="#64748B" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `₹${v / 1000}K`} />
-                  <YAxis yAxisId="right" orientation="right" stroke="#64748B" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}%`} />
+                {/* @ts-ignore */}
+                <ComposedChart data={currentTrendData} margin={{ left: -10, right: 10, top: 20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" vertical={false} opacity={0.5} />
+                  <XAxis dataKey="month" stroke="#64748B" fontSize={11} tickLine={false} axisLine={false} />
+                  <YAxis yAxisId="left" stroke="#64748B" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `₹${(v/1000).toFixed(0)}K`} />
+                  <YAxis yAxisId="right" orientation="right" stroke="#64748B" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}%`} />
                   <Tooltip 
                     contentStyle={{ backgroundColor: '#12142B', borderColor: '#8B5CF6', borderRadius: '8px', color: '#fff' }}
                     formatter={(v: number, name: string) => {
@@ -263,8 +275,8 @@ export default function Dashboard({ data = [] }: DashboardProps) {
                       return [`₹${v.toLocaleString()}`, name];
                     }} 
                   />
-                  <Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ fontSize: '13px', color: '#E5E7EB' }}/>
-                  <Bar yAxisId="left" dataKey="billed" name="Processed Volume" fill="#1E293B" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                  <Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ fontSize: '11px', color: '#9CA3AF' }}/>
+                  <Bar yAxisId="left" dataKey="billed" name="Processed Volume" fill="#3B82F644" radius={[4, 4, 0, 0]} maxBarSize={40} />
                   <Line yAxisId="left" type="monotone" dataKey="validated" name="Baseline Model" stroke="#4ADE80" strokeWidth={2} dot={false} strokeDasharray="5 5" />
                   <Line yAxisId="right" type="monotone" dataKey="anomalyRate" name="Flagged Anomalies" stroke="#F472B6" strokeWidth={3} dot={{ r: 4, fill: '#12142B', strokeWidth: 2 }} activeDot={{ r: 6, fill: '#F472B6' }} />
                 </ComposedChart>

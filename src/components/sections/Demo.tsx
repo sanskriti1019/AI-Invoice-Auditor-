@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, AlertTriangle, FileText, Loader2, CheckCircle2, ChevronDown, ChevronUp, Download } from "lucide-react";
+import { Upload, AlertTriangle, FileText, Loader2, CheckCircle2, ChevronDown, ChevronUp, Download, X } from "lucide-react";
 import { generateMockAnalysis, AnalysisResult } from "@/utils/mockAnalysis";
 
 type ProcessedFile = {
@@ -13,7 +13,7 @@ type ProcessedFile = {
   result?: AnalysisResult;
 };
 
-export default function Demo({ onProcessed }: { onProcessed?: (results: AnalysisResult[]) => void }) {
+export default function Demo({ onProcessed, onRemove }: { onProcessed?: (results: AnalysisResult[]) => void; onRemove?: (id: string) => void }) {
   const [isDragging, setIsDragging] = useState(false);
   const [filesQueue, setFilesQueue] = useState<ProcessedFile[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -118,6 +118,11 @@ export default function Demo({ onProcessed }: { onProcessed?: (results: Analysis
   
   const toggleExpand = (id: string) => {
     setExpandedId(prev => prev === id ? null : id);
+  };
+
+  const handleRemoveFile = (queueId: string, analysisId: string) => {
+    setFilesQueue(prev => prev.filter(f => f.id !== queueId));
+    if (onRemove) onRemove(analysisId);
   };
 
   const handleDownloadReport = () => {
@@ -232,11 +237,19 @@ export default function Demo({ onProcessed }: { onProcessed?: (results: Analysis
                   <AnimatePresence>
                     {filesQueue.map((file, idx) => (
                       <motion.div 
-                        key={`${file.fileName}-${idx}`}
+                        key={file.id}
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="bg-dark/50 border border-white/10 rounded-lg p-4 flex items-center justify-between"
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        className="group/queue relative bg-dark/50 border border-white/10 rounded-lg p-4 flex items-center justify-between"
                       >
+                        <button 
+                          onClick={() => handleRemoveFile(file.id, file.result?.extracted.id || "")}
+                          className="absolute -top-2 -right-2 p-1 rounded-full bg-red-500 text-white opacity-0 group-hover/queue:opacity-100 transition-opacity z-10 shadow-lg hover:bg-red-600 scale-75"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                        
                         <div className="flex items-center gap-3">
                           {file.status === "complete" ? (
                             <CheckCircle2 className="w-5 h-5 text-neon-green" />
@@ -283,7 +296,18 @@ export default function Demo({ onProcessed }: { onProcessed?: (results: Analysis
                       const isExpanded = expandedId === analysis.extracted.id;
 
                       return (
-                        <div key={analysis.extracted.id} className="border border-white/10 rounded-xl overflow-hidden bg-dark transition-colors hover:border-white/20">
+                        <div key={analysis.extracted.id} className="relative group/result border border-white/10 rounded-xl overflow-hidden bg-dark transition-colors hover:border-white/20">
+                          {/* Delete Button */}
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemoveFile(file.id, analysis.extracted.id);
+                            }}
+                            className="absolute top-2 right-2 p-1.5 rounded-lg bg-red-500/10 text-red-500 opacity-0 group-hover/result:opacity-100 transition-all hover:bg-red-500/20 z-20 border border-red-500/20"
+                            title="Remove Report"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
                           {/* Card Header (Collapsible Trigger) */}
                           <div 
                             className="p-4 flex flex-wrap items-center justify-between cursor-pointer hover:bg-white/5 transition-colors gap-4"
