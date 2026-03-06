@@ -60,16 +60,13 @@ const checks = [
 ];
 
 export default function WhatItChecks() {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
-
   return (
-    <section className="py-24 md:py-32 px-6 bg-dark reveal">
+    <section className="py-24 md:py-32 px-6 bg-dark">
       <div className="max-w-6xl mx-auto">
         <motion.div
-          ref={ref}
           initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
           variants={staggerContainer}
           className="text-center mb-16"
         >
@@ -88,9 +85,9 @@ export default function WhatItChecks() {
         </motion.div>
 
         <motion.div
-          ref={ref}
           initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
+          whileInView="visible"
+          viewport={{ once: true }}
           variants={staggerContainer}
           className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"
         >

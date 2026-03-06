@@ -90,17 +90,24 @@ export default function Dashboard({ data = [] }: DashboardProps) {
   })() : errorTypeData;
 
   return (
-    <section id="dashboard" className="py-24 md:py-32 px-6 bg-dark-900 border-y border-white/5 relative overflow-hidden reveal">
+    <motion.section 
+      id="dashboard" 
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-100px" }}
+      transition={{ duration: 0.8 }}
+      className="py-24 md:py-32 px-6 bg-dark-900 border-y border-white/5 relative overflow-hidden"
+    >
       {/* Background elements */}
       <div className="absolute top-0 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[120px] pointer-events-none"></div>
       <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-accent-purple/10 rounded-full blur-[120px] pointer-events-none"></div>
 
       <div className="max-w-6xl mx-auto relative z-10">
         <motion.div
+          variants={staggerContainer}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          variants={staggerContainer}
+          viewport={{ once: true }}
           className="text-center mb-16"
         >
           <motion.h2
@@ -147,7 +154,7 @@ export default function Dashboard({ data = [] }: DashboardProps) {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="glass-panel p-6 border border-white/5 lg:col-span-1 reveal"
+            className="glass-panel p-6 border border-white/5 lg:col-span-1"
           >
             <h3 className="text-lg font-semibold text-gray-200 mb-6 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-accent-purple animate-pulse"></span>
@@ -266,6 +273,6 @@ export default function Dashboard({ data = [] }: DashboardProps) {
           </motion.div>
         </div>
       </div>
-    </section>
+    </motion.section>
   );
 }

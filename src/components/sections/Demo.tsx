@@ -120,8 +120,37 @@ export default function Demo({ onProcessed }: { onProcessed?: (results: Analysis
     setExpandedId(prev => prev === id ? null : id);
   };
 
+  const handleDownloadReport = () => {
+    if (processedResults.length === 0) return;
+    
+    // Create CSV content
+    const headers = ["Vendor", "Invoice #", "Date", "Total Billed", "Potential Overcharge", "Issues Found"];
+    const rows = processedResults.map(file => {
+      const res = file.result!;
+      return [
+        res.extracted.vendorName,
+        res.extracted.invoiceNumber,
+        res.extracted.invoiceDate,
+        res.summary.totalBilled,
+        res.summary.potentialOvercharge,
+        res.discrepancies.length
+      ].join(",");
+    });
+    
+    const csvContent = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.setAttribute("hidden", "");
+    a.setAttribute("href", url);
+    a.setAttribute("download", `audit-report-${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
   return (
-    <section id="demo" className="py-24 md:py-32 px-6 bg-dark">
+    <section id="demo" className="py-24 md:py-32 px-6 bg-dark overflow-hidden">
       <div className="max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -148,11 +177,11 @@ export default function Demo({ onProcessed }: { onProcessed?: (results: Analysis
             <h3 className="text-xl font-bold text-gray-100">Batch Processing Pipeline</h3>
             {processedResults.length > 0 && !isProcessingBatch && (
               <button 
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white transition-colors text-sm font-semibold"
-                onClick={() => alert("Downloading Audit Report (PDF/CSV) - Mock Action")}
+                className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-white transition-all text-sm font-semibold glow-cyan hover:scale-105 active:scale-95"
+                onClick={handleDownloadReport}
               >
                 <Download className="w-4 h-4" />
-                Download Audit Report
+                Download CSV Report
               </button>
             )}
           </div>

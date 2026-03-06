@@ -35,17 +35,15 @@ const problems = [
 ];
 
 export default function Problem() {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
-
   return (
-    <section ref={ref} className="py-24 md:py-32 px-6 bg-dark-900 border-y border-white/5 relative reveal">
+    <section className="py-24 md:py-32 px-6 bg-dark-900 border-y border-white/5 relative">
       <div className="absolute right-0 bottom-0 w-[500px] h-[500px] bg-accent-purple/5 opacity-50 blur-[120px] rounded-full pointer-events-none"></div>
 
       <div className="max-w-6xl mx-auto relative z-10">
         <motion.div
           initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
           variants={staggerContainer}
           className="text-center mb-16"
         >
@@ -53,21 +51,22 @@ export default function Problem() {
             variants={fadeInUp}
             className="text-4xl md:text-5xl font-bold text-gray-100 mb-4"
           >
-            Why Invoice Auditing Fails
+            The Hidden Cost of Manual Auditing
           </motion.h2>
           <motion.p
             variants={fadeInUp}
             className="text-xl text-gray-400 max-w-2xl mx-auto"
           >
-            Traditional finance operations cannot scale to reliably catch complex billing anomalies.
+            Enterprises lose 3-5% of their EBITDA to vendor overbilling, duplicate payments, and tax non-compliance every year.
           </motion.p>
         </motion.div>
 
         <motion.div
           initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
+          whileInView="visible"
+          viewport={{ once: true }}
           variants={staggerContainer}
-          className="grid md:grid-cols-2 gap-6"
+          className="grid md:grid-cols-3 gap-8"
         >
           {problems.map((problem, i) => (
             <motion.div key={i} variants={fadeInUp}>

@@ -34,19 +34,16 @@ const steps = [
 ];
 
 export default function HowItWorks() {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
-
   return (
-    <section className="py-24 md:py-32 px-6 bg-dark relative overflow-hidden reveal">
+    <section className="py-24 md:py-32 px-6 bg-dark relative overflow-hidden">
       {/* Background glow */}
       <div className="absolute top-1/2 left-0 w-96 h-96 bg-primary/5 rounded-full blur-[100px] -translate-y-1/2"></div>
       
       <div className="max-w-6xl mx-auto relative z-10">
         <motion.div
-          ref={ref}
           initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
           variants={staggerContainer}
           className="text-center mb-16"
         >
@@ -65,9 +62,9 @@ export default function HowItWorks() {
         </motion.div>
 
         <motion.div
-          ref={ref}
           initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
+          whileInView="visible"
+          viewport={{ once: true }}
           variants={staggerContainer}
           className="space-y-8 max-w-4xl mx-auto"
         >
