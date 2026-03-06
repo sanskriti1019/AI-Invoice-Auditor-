@@ -18,6 +18,7 @@ import CustomCursor from "@/components/ui/CustomCursor";
 
 export default function Home() {
   const [showIntro, setShowIntro] = useState(true);
+  const [processedData, setProcessedData] = useState<any[]>([]); // Using any for simplicity, usually match AnalysisResult[]
   const isDesktop = useMedia("(min-width: 1024px)", true);
 
   // Prevent scrolling while intro is active
@@ -28,6 +29,10 @@ export default function Home() {
       document.body.style.overflow = "auto";
     }
   }, [showIntro]);
+
+  const handleProcessed = (results: any[]) => {
+    setProcessedData(prev => [...prev, ...results]);
+  };
 
   return (
     <>
@@ -50,8 +55,8 @@ export default function Home() {
           <Problem />
           <HowItWorks />
           <WhatItChecks />
-          <Demo />
-          <Dashboard />
+          <Demo onProcessed={handleProcessed} />
+          <Dashboard data={processedData} />
           <DesignPhilosophy />
           <WriteUp />
           <Footer />

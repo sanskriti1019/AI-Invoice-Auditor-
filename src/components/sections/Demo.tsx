@@ -13,7 +13,7 @@ type ProcessedFile = {
   result?: AnalysisResult;
 };
 
-export default function Demo() {
+export default function Demo({ onProcessed }: { onProcessed?: (results: AnalysisResult[]) => void }) {
   const [isDragging, setIsDragging] = useState(false);
   const [filesQueue, setFilesQueue] = useState<ProcessedFile[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -30,6 +30,8 @@ export default function Demo() {
     setFilesQueue(prev => [...prev, ...newFiles]);
 
     // Process files concurrently
+    const newlyProcessed: AnalysisResult[] = [];
+    
     const processFile = async (file: typeof newFiles[0]) => {
       setFilesQueue(current => {
         const queue = [...current];
@@ -62,6 +64,7 @@ export default function Demo() {
       await new Promise(resolve => setTimeout(resolve, 400 + Math.random() * 300)); // Validate simulate
 
       const result = generateMockAnalysis(file.fileName);
+      newlyProcessed.push(result);
 
       setFilesQueue(current => {
         const queue = [...current];
@@ -76,7 +79,8 @@ export default function Demo() {
     };
 
     await Promise.all(newFiles.map(processFile));
-  }, []);
+    if (onProcessed) onProcessed(newlyProcessed);
+  }, [onProcessed]);
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {

@@ -53,7 +53,42 @@ const stats = [
   { label: "Overcharges identified", value: "₹48,200", highlight: true },
 ];
 
-export default function Dashboard() {
+import { AnalysisResult } from "@/utils/mockAnalysis";
+
+interface DashboardProps {
+  data?: AnalysisResult[];
+}
+
+export default function Dashboard({ data = [] }: DashboardProps) {
+  // Use real data if available, otherwise fallback to initial highlights
+  const hasRealData = data.length > 0;
+  
+  const currentStats = hasRealData ? [
+    { label: "Invoices processed", value: data.length.toString() },
+    { label: "Total billed", value: `₹${(data.reduce((acc, curr) => acc + curr.summary.totalBilled, 0) / 100000).toFixed(1)}L` },
+    { label: "Verified amount", value: `₹${(data.reduce((acc, curr) => acc + curr.summary.estimatedCorrect, 0) / 100000).toFixed(1)}L` },
+    { label: "Overcharges identified", value: `₹${data.reduce((acc, curr) => acc + curr.summary.potentialOvercharge, 0).toLocaleString()}`, highlight: true },
+  ] : stats;
+
+  const currentVendorData = hasRealData ? 
+    data.slice(0, 5).map(d => ({ name: d.extracted.vendorName.split(' ')[0], overcharge: d.summary.potentialOvercharge })) : 
+    vendorData;
+
+  // Calculate anomaly distribution from real data if available
+  const currentErrorData = hasRealData ? (() => {
+    const counts: Record<string, number> = {};
+    data.forEach(d => d.discrepancies.forEach(disc => {
+        counts[disc.type] = (counts[disc.type] || 0) + 1;
+    }));
+    const total = Object.values(counts).reduce((a, b) => a + b, 0);
+    if (total === 0) return errorTypeData;
+    return Object.entries(counts).map(([name, count], i) => ({
+        name,
+        value: Math.round((count / total) * 100),
+        color: errorTypeData[i % errorTypeData.length].color
+    }));
+  })() : errorTypeData;
+
   return (
     <section id="dashboard" className="py-24 md:py-32 px-6 bg-dark-900 border-y border-white/5 relative overflow-hidden reveal">
       {/* Background elements */}
@@ -78,7 +113,9 @@ export default function Dashboard() {
             variants={fadeInUp}
             className="text-xl text-gray-400 max-w-2xl mx-auto"
           >
-            Live analytics monitoring processing throughput and identified fiscal leakages.
+            {hasRealData 
+              ? "Live analytics reflecting your uploaded invoices and identified fiscal leakages."
+              : "Live analytics monitoring processing throughput and identified fiscal leakages."}
           </motion.p>
         </motion.div>
 
@@ -89,7 +126,7 @@ export default function Dashboard() {
           variants={staggerContainer}
           className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
         >
-          {stats.map((stat, i) => (
+          {currentStats.map((stat, i) => (
             <motion.div
               key={i}
               variants={fadeInUp}
@@ -120,7 +157,7 @@ export default function Dashboard() {
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={errorTypeData}
+                    data={currentErrorData}
                     cx="50%"
                     cy="50%"
                     innerRadius={60}
@@ -129,7 +166,7 @@ export default function Dashboard() {
                     dataKey="value"
                     stroke="none"
                   >
-                    {errorTypeData.map((entry, i) => (
+                    {currentErrorData.map((entry, i) => (
                       <Cell key={i} fill={entry.color} />
                     ))}
                   </Pie>
