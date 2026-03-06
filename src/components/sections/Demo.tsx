@@ -243,14 +243,14 @@ export default function Demo({ onProcessed, onRemove }: { onProcessed?: (results
                         exit={{ opacity: 0, scale: 0.9 }}
                         className="group/queue relative bg-dark/50 border border-white/10 rounded-lg p-4 flex items-center justify-between"
                       >
-                        <button 
-                          onClick={() => handleRemoveFile(file.id, file.result?.extracted.id || "")}
-                          className="absolute -top-2 -right-2 p-1 rounded-full bg-red-500 text-white opacity-0 group-hover/queue:opacity-100 transition-opacity z-10 shadow-lg hover:bg-red-600 scale-75"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                        
                         <div className="flex items-center gap-3">
+                          <button 
+                            onClick={() => handleRemoveFile(file.id, file.result?.extracted.id || "")}
+                            className="p-1 px-2 rounded-lg bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20 transition-all"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                          
                           {file.status === "complete" ? (
                             <CheckCircle2 className="w-5 h-5 text-neon-green" />
                           ) : (
@@ -297,17 +297,6 @@ export default function Demo({ onProcessed, onRemove }: { onProcessed?: (results
 
                       return (
                         <div key={analysis.extracted.id} className="relative group/result border border-white/10 rounded-xl overflow-hidden bg-dark transition-colors hover:border-white/20">
-                          {/* Delete Button */}
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleRemoveFile(file.id, analysis.extracted.id);
-                            }}
-                            className="absolute top-2 right-2 p-1.5 rounded-lg bg-red-500/10 text-red-500 opacity-0 group-hover/result:opacity-100 transition-all hover:bg-red-500/20 z-20 border border-red-500/20"
-                            title="Remove Report"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
                           {/* Card Header (Collapsible Trigger) */}
                           <div 
                             className="p-4 flex flex-wrap items-center justify-between cursor-pointer hover:bg-white/5 transition-colors gap-4"
@@ -341,8 +330,21 @@ export default function Demo({ onProcessed, onRemove }: { onProcessed?: (results
                                     {analysis.discrepancies.length}
                                   </p>
                                 </div>
-                                <div className="p-2 bg-dark-900 rounded-lg">
-                                  {isExpanded ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
+                                <div className="flex items-center gap-3">
+                                  <div className="p-2 bg-dark-900 rounded-lg border border-white/5">
+                                    {isExpanded ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
+                                  </div>
+                                  
+                                  <button 
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleRemoveFile(file.id, analysis.extracted.id);
+                                    }}
+                                    className="p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all border border-red-500/20"
+                                    title="Remove Report"
+                                  >
+                                    <X className="w-4 h-4" />
+                                  </button>
                                 </div>
                              </div>
                           </div>
